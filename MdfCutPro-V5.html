@@ -518,7 +518,7 @@ function desenharPecaNoContexto(ctx, p, s, offsetX = 0, offsetY = 0, hideText = 
     // Adiciona o texto das dimensões no centro da peça
     if (!hideText && w > 30 * s && h > 15 * s) {
         ctx.fillStyle = "#000";
-        ctx.font = `${Math.max(8, Math.min(w, h) / 5)}px Arial`;
+        ctx.font = `${Math.max(8, Math.min(w, h) / 8)}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         let textContent;

@@ -5,7 +5,7 @@
   "start_url": "/mdfcut/MdfCutPro-V5.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#f5f2ec",
   "icons": [
     {
       "src": "/mdfcut/icone-192x192.png",

@@ -993,6 +993,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div id="resultado" class="chapa-resumo"></div>
 </div>
-
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/mdfcut/sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registrado com sucesso: ', registration.scope);
+        })
+        .catch(err => {
+          console.log('Falha no registro do ServiceWorker: ', err);
+        });
+    });
+  }
+</script>
+  
 </body>
 </html>

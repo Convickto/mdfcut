@@ -32,7 +32,7 @@ h1, h2, h3 {
 select {
     padding: 0.6rem;
     border-radius: 12px;
-    border: none; // 1px solid #e6e0d6;
+    border: none;
     font-size: 0.8rem;
     margin: 0.3rem 0;
     width: 100%;
@@ -138,9 +138,11 @@ document.onkeydown = function(e) {
 // =========================================
 // == VARIÁVEIS GLOBAIS DE CONFIGURAÇÃO ====
 // =========================================
-const LARGURA_CHAPA = 2750; // Largura da chapa em milímetros
-const ALTURA_CHAPA = 1850; // Altura da chapa em milímetros
-const PRECO_CHAPA = 250.00; // Preço unitário de uma chapa
+let LARGURA_CHAPA = 2750; // Largura da chapa em milímetros (agora pode ser configurada pelo usuário)
+let ALTURA_CHAPA = 1850; // Altura da chapa em milímetros (agora pode ser configurada pelo usuário)
+let PRECO_CHAPA = 250.00; // Preço unitário de uma chapa (agora pode ser configurado pelo usuário)
+let ESPESSURA_MADEIRA = 15; // Espessura da madeira em milímetros (NOVO, configurável pelo usuário)
+let TIPO_MATERIAL = 'MDF'; // Tipo de material (NOVO, configurável pelo usuário)
 const ESPACO_MM = 5; // Espaçamento mínimo entre peças (corte da serra)
 
 let pecas = [];
@@ -300,6 +302,13 @@ function removerPeca(index) {
 // == ALGORITMO DE CORTE ===================
 // =========================================
 function calcularCorte() {
+    // Captura os valores de configuração da chapa antes de iniciar o cálculo
+    LARGURA_CHAPA = parseInt($('chapaLargura').value) || LARGURA_CHAPA;
+    ALTURA_CHAPA = parseInt($('chapaAltura').value) || ALTURA_CHAPA;
+    PRECO_CHAPA = parseFloat($('chapaValor').value) || PRECO_CHAPA;
+    ESPESSURA_MADEIRA = parseInt($('espessuraMadeira').value) || ESPESSURA_MADEIRA;
+    TIPO_MATERIAL = $('tipoMaterial').value || TIPO_MATERIAL;
+
     const barCont = $('progressCont');
     const bar = $('progressBar');
 
@@ -311,7 +320,7 @@ function calcularCorte() {
     chapas = [];
     $('resultado').innerHTML = '';
     desenharChapa(-1); // Limpa o canvas principal
-    atualizarResumoCorte([]);
+    atualizarResumoCorte([]); // Limpa e atualiza o resumo com os novos valores de config
 
     let fila = [];
     pecas.forEach(p => {
@@ -618,7 +627,13 @@ function mostrarResultado(chapasCalculadas) {
         const d = document.createElement('div');
         d.className = 'chapa-resumo';
         const apv = ((c.areaUsada / (LARGURA_CHAPA * ALTURA_CHAPA)) * 100).toFixed(2);
-        d.innerHTML = `<strong>Chapa ${i + 1}</strong><br>Aproveitamento: ${apv}%<br>Peças:<ul>`;
+        
+        // Adicionar informações da chapa e material no resumo de cada chapa
+        d.innerHTML = `<strong>Chapa ${i + 1}</strong><br>` +
+                      `Dimensões da Chapa: ${LARGURA_CHAPA}x${ALTURA_CHAPA}mm<br>` +
+                      `Material: ${TIPO_MATERIAL} (${ESPESSURA_MADEIRA}mm)<br>` +
+                      `Valor Unitário: R$ ${PRECO_CHAPA.toFixed(2)}<br>` +
+                      `Aproveitamento: ${apv}%<br>Peças:<ul>`;
         if (!c.usados.length) {
             d.innerHTML += '<li>Nenhuma peça encaixada.</li>';
         } else {
@@ -650,10 +665,18 @@ function atualizarResumoCorte(chs) {
     const resumoChapasUtilizadas = $('resumoChapasUtilizadas');
     const resumoAreaUtilizada = $('resumoAreaUtilizada');
     const resumoCustoTotal = $('resumoCustoTotal');
+    const resumoEspessura = $('resumoEspessura'); // NOVO
+    const resumoTipoMaterial = $('resumoTipoMaterial'); // NOVO
+    const resumoDimensaoChapa = $('resumoDimensaoChapa'); // NOVO
+    const resumoValorUnitarioChapa = $('resumoValorUnitarioChapa'); // NOVO
 
     if (resumoChapasUtilizadas) resumoChapasUtilizadas.textContent = total;
     if (resumoAreaUtilizada) resumoAreaUtilizada.textContent = `${area.toFixed(2)} mm² (${pct}%)`;
     if (resumoCustoTotal) resumoCustoTotal.textContent = `R$ ${(total * PRECO_CHAPA).toFixed(2)}`;
+    if (resumoEspessura) resumoEspessura.textContent = `${ESPESSURA_MADEIRA}mm`; // NOVO
+    if (resumoTipoMaterial) resumoTipoMaterial.textContent = TIPO_MATERIAL; // NOVO
+    if (resumoDimensaoChapa) resumoDimensaoChapa.textContent = `${LARGURA_CHAPA}x${ALTURA_CHAPA}mm`; // NOVO
+    if (resumoValorUnitarioChapa) resumoValorUnitarioChapa.textContent = `R$ ${PRECO_CHAPA.toFixed(2)}`; // NOVO
 }
 
 // =========================================
@@ -869,6 +892,14 @@ function toggleCamposPeca() {
 // == INICIALIZAÇÃO DA APLICAÇÃO ==========
 // =========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Define valores padrão para os novos campos de entrada se estiverem vazios
+    // ou garante que o valor inicial do input reflita a variável global
+    $('espessuraMadeira').value = ESPESSURA_MADEIRA;
+    $('chapaLargura').value = LARGURA_CHAPA;
+    $('chapaAltura').value = ALTURA_CHAPA;
+    $('chapaValor').value = PRECO_CHAPA.toFixed(2);
+    $('tipoMaterial').value = TIPO_MATERIAL; // Garante que o select exibe o valor padrão
+
     atualizarListaPecas();
     atualizarResumoCorte([]);
 
@@ -914,6 +945,98 @@ document.addEventListener('DOMContentLoaded', () => {
 <h1>Simulador de Corte de Chapas MDF</h1>
 
 <div class="neumorphic-card" id="cardAdicaoPecas">
+    <h2>Configurações da Chapa e Material</h2>
+    <div class="input-group">
+        <div>
+            <label for="espessuraMadeira">Espessura da Madeira (mm):</label>
+            <input id="espessuraMadeira" type="number" min="1" max="100" value="15" class="neumorphic-input" />
+        </div>
+        <div>
+            <label for="chapaLargura">Largura da Chapa (mm):</label>
+            <input id="chapaLargura" type="number" min="1" value="2750" class="neumorphic-input" />
+        </div>
+        <div>
+            <label for="chapaAltura">Altura da Chapa (mm):</label>
+            <input id="chapaAltura" type="number" min="1" value="1850" class="neumorphic-input" />
+        </div>
+        <div>
+            <label for="chapaValor">Valor da Chapa (R$):</label>
+            <input id="chapaValor" type="number" step="0.01" min="0" value="250.00" class="neumorphic-input" />
+        </div>
+        <div>
+            <label for="tipoMaterial">Tipo de Material:</label>
+            <select id="tipoMaterial" class="neumorphic-input">
+                <option value="MDF">MDF</option>
+                <option value="MDP">MDP</option>
+                <option value="HDF">HDF</option>
+                <option value="OSB">OSB</option>
+                <option value="Compensado">Compensado</option>
+                <option value="Compensado naval">Compensado naval</option>
+                <option value="Duratex">Duratex</option>
+                <option value="Formica">Formica</option>
+                <option value="Pinho">Pinho</option>
+                <option value="Cedro">Cedro</option>
+                <option value="Eucalipto">Eucalipto</option>
+                <option value="Peroba rosa">Peroba rosa</option>
+                <option value="Jatobá">Jatobá</option>
+                <option value="Ipê">Ipê</option>
+                <option value="Angelim">Angelim</option>
+                <option value="Angelim pedra">Angelim pedra</option>
+                <option value="Freijó">Freijó</option>
+                <option value="Imbuia">Imbuia</option>
+                <option value="Marfim">Marfim</option>
+                <option value="Louro">Louro</option>
+                <option value="Louro preto">Louro preto</option>
+                <option value="Louro vermelho">Louro vermelho</option>
+                <option value="Louro faia">Louro faia</option>
+                <option value="Itaúba">Itaúba</option>
+                <option value="Cumaru">Cumaru</option>
+                <option value="Maçaranduba">Maçaranduba</option>
+                <option value="Tauari">Tauari</option>
+                <option value="Sucupira">Sucupira</option>
+                <option value="Garapeira">Garapeira</option>
+                <option value="Teca">Teca</option>
+                <option value="Roxinho">Roxinho</option>
+                <option value="Jequitibá">Jequitibá</option>
+                <option value="Cabreúva">Cabreúva</option>
+                <option value="Guajuvira">Guajuvira</option>
+                <option value="Pau-ferro">Pau-ferro</option>
+                <option value="Mogno">Mogno</option>
+                <option value="Mogno africano">Mogno africano</option>
+                <option value="Pinus autoclavado">Pinus autoclavado</option>
+                <option value="Placa de USB">Placa de USB</option>
+                <option value="Placa cimentícia">Placa cimentícia</option>
+                <option value="Chapa de OSB resinada">Chapa de OSB resinada</option>
+                <option value="Chapa dura">Chapa dura</option>
+                <option value="Laminado de madeira">Laminado de madeira</option>
+                <option value="Laminado melamínico">Laminado melamínico</option>
+                <option value="Veneer">Veneer</option>
+                <option value="HPL (High Pressure Laminate)">HPL (High Pressure Laminate)</option>
+                <option value="Aglomerado">Aglomerado</option>
+                <option value="Aglomerado revestido">Aglomerado revestido</option>
+                <option value="Placas de bambu">Placas de bambu</option>
+                <option value="Placas de balsa">Placas de balsa</option>
+                <option value="PVC expandido">PVC expandido</option>
+                <option value="Poliestireno">Poliestireno</option>
+                <option value="Placas de acrílico">Placas de acrílico</option>
+                <option value="Madeira de demolição">Madeira de demolição</option>
+                <option value="Dormentes">Dormentes</option>
+                <option value="Caibro">Caibro</option>
+                <option value="Ripa">Ripa</option>
+                <option value="Sarrafo">Sarrafo</option>
+                <option value="Tábua">Tábua</option>
+                <option value="Madeirite">Madeirite</option>
+                <option value="Madeirite plastificado">Madeirite plastificado</option>
+                <option value="Madeirite resinado">Madeirite resinado</option>
+                <option value="OSB plastificado">OSB plastificado</option>
+                <option value="Tapume">Tapume</option>
+                <option value="Deck de madeira">Deck de madeira</option>
+                <option value="Palete">Palete</option>
+                <option value="Mouro">Mouro (toras brutas)</option>
+            </select>
+        </div>
+    </div>
+
     <h2>Adicionar Peças para Corte</h2>
     <p id="mensagemStatus" style="display:none;"></p>
     <div class="input-group">
@@ -979,23 +1102,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <h3>EXPORTAR</h3>
         <p>Só é permitido baixar um arquivo por projeto!</p>
         <button id="exportarImagemBtn" class="neumorphic-button">Exportar PNG</button>
-        <button id="exportarDxfBtn" class="neumorphic-button">Exportar DXF</button> </div>
+        <button id="exportarDxfBtn" class="neumorphic-button">Exportar DXF</button>
+    </div>
     
-  
-    
-        
-    
-    
-    
-    <label>
-        <h3>Dimensões da chapa</h3>
-        <p>2750 × 1850 mm</p>
-        <h3>Preço unitário</h3>
-        <p>R$ 250,00</p>
-    </label>
-
     <div class="neumorphic-card summary-card">
         <h2>Resumo do Corte</h2>
+        <p>Tipo de Material: <strong id="resumoTipoMaterial">MDF</strong></p>
+        <p>Espessura da Madeira: <strong id="resumoEspessura">0mm</strong></p>
+        <p>Dimensões da Chapa: <strong id="resumoDimensaoChapa">0x0mm</strong></p>
+        <p>Valor Unitário da Chapa: <strong id="resumoValorUnitarioChapa">R$ 0,00</strong></p>
         <p>Total de Chapas Utilizadas: <strong id="resumoChapasUtilizadas">0</strong></p>
         <p>Aproveitamento Global: <strong id="resumoAreaUtilizada">0 mm² (0 %)</strong></p>
         <p>Custo Total Estimado: <strong id="resumoCustoTotal">R$ 0,00</strong></p>

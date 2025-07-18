@@ -1,16 +1,11 @@
 const CACHE_NAME = 'mdfcut-cache-v1'; // Nome do cache (mude se fizer grandes atualizações)
 const urlsToCache = [
-  '/mdfcut/', // A raiz do seu projeto no GitHub Pages
-  '/mdfcut/MdfCutPro-V5.html',
-  '/mdfcut/manifest.json',
-  '/mdfcut/icone-192x192.png',
-  '/mdfcut/icone-512x512.png',
-  // Adicione todos os seus arquivos CSS, JS, imagens, etc. aqui
-  // Exemplo:
-  // '/mdfcut/css/style.css',
-  // '/mdfcut/js/script.js',
-  // '/mdfcut/images/icone-192x192.png',
-  // '/mdfcut/images/icone-512x512.png'
+  'MdfCutPro-V5.html',
+  'manifest.json',
+  'icone-192x192.png',
+  'icone-512x512.png',
+  'style.css',
+  'script.js'
 ];
 
 // Evento de instalação do Service Worker: Cacheia os arquivos estáticos

@@ -185,11 +185,11 @@
 
     <div id="resultado" class="chapa-resumo"></div>
 </div>
-<script src="script.js"></script>
+<script src="/mdfcut/script.js"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
+      navigator.serviceWorker.register('/mdfcut/sw.js')
         .then(registration => {
           console.log('ServiceWorker registrado com sucesso: ', registration.scope);
         })

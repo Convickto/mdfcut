@@ -1,11 +1,11 @@
-const CACHE_NAME = 'mdfcut-cache-v1'; // Nome do cache (mude se fizer grandes atualizações)
+const CACHE_NAME = 'mdfcut-cache-v1';
 const urlsToCache = [
-  'MdfCutPro-V5.html',
-  'manifest.json',
-  'icone-192x192.png',
-  'icone-512x512.png',
-  'style.css',
-  'script.js'
+  '/mdfcut/MdfCutPro-V5.html',
+  '/mdfcut/manifest.json',
+  '/mdfcut/icone-192x192.png',
+  '/mdfcut/icone-512x512.png',
+  '/mdfcut/style.css',
+  '/mdfcut/script.js'
 ];
 
 // Evento de instalação do Service Worker: Cacheia os arquivos estáticos
